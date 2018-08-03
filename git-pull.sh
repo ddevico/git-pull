@@ -13,7 +13,6 @@ BRANCH="trb-bbt-release-1806"
 
 i=0
 j=2
-cd $(pwd)
 symbolic=$(gr git symbolic-ref HEAD --short 2> /dev/null)
 for ligne in $symbolic; do
 	if [ $ligne != "in" ]; then
@@ -22,6 +21,11 @@ for ligne in $symbolic; do
 	fi
 done
 cpt=${#tab[@]}
+
+SCRIPT="$(readlink --canonicalize-existing "$0")"
+SCRIPTPATH="$(dirname "$SCRIPT")"
+cd $SCRIPTPATH
+
 printf "\n______________ GIT CHECKOUT TRB_BBT ______________\n"
 gr git checkout $BRANCH
 printf "\n___________________ GIT FETCH ____________________\n"
@@ -29,6 +33,7 @@ gr git fetch
 printf "\n____________ GIT PULL ORIGIN TRB_BBT _____________\n"
 gr git pull origin $BRANCH
 printf "\n__________________ RETURN BRANCH _________________\n\n"
+
 for ((i=1; i<$cpt; i+=3))
 do
 	path=$(basename ${tab[$i]})
@@ -36,6 +41,7 @@ do
 	initialBranch=${tab[$j]}
 	printf "%s\n" $path
 	cd $path
+	echo $(pwd)
 	git checkout $initialBranch
 	cd ..
 	printf "\n"
