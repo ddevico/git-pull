@@ -41,7 +41,6 @@ do
 	initialBranch=${tab[$j]}
 	printf "%s\n" $path
 	cd $path
-	echo $(pwd)
 	git checkout $initialBranch
 	cd ..
 	printf "\n"
