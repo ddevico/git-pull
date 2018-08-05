@@ -15,10 +15,9 @@ Finally, run the following command:
 ## Description
 
 There are two modes, auto and manual mode.
-- There are two modes, auto and manual mode.
-When auto mode is enabled, it pull the main workflow in this order:
-- trb-***-release-****
-- release-***
+- When auto mode is enabled, it pull the main workflow in this order:
+trb-***-release-****
+release-***
 If none of the branches are found, it pull master.
 - When the manual mode is active, the program pull the specified branch when activating the manual mode (see option below)
     
