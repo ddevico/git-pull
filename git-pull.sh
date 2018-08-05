@@ -9,7 +9,24 @@
 #notes           :Install gr to use this script.
 #==============================================================================
 
-#BRANCH="trb-bbt-release-1806"
+OPTION="manual"
+BRANCH="test"
+
+function changeNameGlobal()
+{
+	NEW_VALUE="\"$1\""
+	NAME_GLOBAL=$2
+	sed_param=s/${NAME_GLOBAL}=\".*/${NAME_GLOBAL}=${NEW_VALUE}/
+	sed -i '' "$sed_param" git-pull.sh
+}
+
+function getNameOfBranch()
+{
+	arr=("$@")
+	tLen=${#arr[@]}
+	branch=${arr[$i]##*=}
+	changeNameGlobal "$branch" "BRANCH"
+}
 
 function getMaxFromBranch()
 {
@@ -24,6 +41,30 @@ function getMaxFromBranch()
 	done
 }
 
+if [ ! -z "$1" ]; then
+	if [[ $1 = '-help' ]]; then
+		if [[ $OPTION = "auto" ]]; then
+			echo -e "You are in automatic mode.\n\nTo switch to manual mode, use the -manual='name of branch' option :\n./git-pull -manual='name of branch'"
+		else
+			echo -e "You are in manual mode on "$BRANCH"\n\nTo switch to auto mode, use the -auto option :\n./git-pull -auto"
+		fi
+		exit
+	elif [[ $1 =~ ^-manual=[[:print:]]+ ]]; then
+		changeNameGlobal "manual" "OPTION"
+		getNameOfBranch "$1"
+		echo -e "Manual mode enabled\nyou have selected : "$branch
+		exit
+	elif [[ $1 = '-auto' ]]; then
+		changeNameGlobal "auto" "OPTION"
+		changeNameGlobal "" "BRANCH"
+		echo "Auto mode enabled"
+		exit
+	else
+		echo -e "This option does not exist.\n-help for more informations"
+		exit
+	fi
+fi
+
 symbolic=$(gr git symbolic-ref HEAD --short 2> /dev/null)
 i=0
 for ligne in $symbolic; do
@@ -32,35 +73,40 @@ for ligne in $symbolic; do
 		i=$((i + 1))
 	fi
 done
-
 tlen=${#tab[@]}
-trbInc=0
-releaseInc=0
-for ((i=2; i<$tlen; i+=3))
-do
-	if [[ ${tab[$i]} =~ ^trb-[a-z]{3}-release-[0-9]{4}$ ]]; then
-		trb[$trbInc]=${tab[$i]}
-		#echo ${trb[$trbInc]}
-		trbInc=$((trbInc + 1))
-	fi
-	if [[ ${tab[$i]} =~ ^release-[0-9]{4}$ ]]; then
-		release[$releaseInc]=${tab[$i]}
-		#echo ${release[$releaseInc]}
-		releaseInc=$((releaseInc + 1))
-	fi
-done
-if [ -z "$trb" ]; then
-    if [ -z "$release" ]; then
-		$BRANCH="master"
+
+if [[ $option = "auto" ]]; then
+	trbInc=0
+	releaseInc=0
+	for ((i=2; i<$tlen; i+=3))
+	do
+		if [[ ${tab[$i]} =~ ^trb-[a-z]{3}-release-[0-9]{4}$ ]]; then
+			trb[$trbInc]=${tab[$i]}
+			#echo ${trb[$trbInc]}
+			trbInc=$((trbInc + 1))
+		fi
+		if [[ ${tab[$i]} =~ ^release-[0-9]{4}$ ]]; then
+			release[$releaseInc]=${tab[$i]}
+			#echo ${release[$releaseInc]}
+			releaseInc=$((releaseInc + 1))
+		fi
+	done
+	if [ -z "$trb" ]; then
+	    if [ -z "$release" ]; then
+			echoBranch="master"
+			BRANCH=$echoBranch
+		else
+			getMaxFromBranch "${release[@]}"
+			echoBranch="release-"$max
+			BRANCH=$echoBranch
+			echo $BRANCH
+		fi
 	else
-		getMaxFromBranch "${release[@]}"
-		BRANCH="release-"$max
+		getMaxFromBranch "${trb[@]}"
+		echoBranch="trb-bbt-release-"$max
+		BRANCH=$echoBranch
 		echo $BRANCH
 	fi
-else
-	getMaxFromBranch "${trb[@]}"
-	BRANCH="trb-bbt-release-"$max
-	echo $BRANCH
 fi
 
 SCRIPT="$(readlink --canonicalize-existing "$0")"
