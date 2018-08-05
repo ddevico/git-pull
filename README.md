@@ -11,6 +11,8 @@ There are two modes, auto and manual mode.
 If none of the branches are found, it pull master.
 - When the manual mode is active, the program pull the specified branch when activating the manual mode (see option below)
 
+By default, auto mode is enabled
+
 ## Getting started
 
 First, [install GR] (https://github.com/mixu/gr)
