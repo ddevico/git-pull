@@ -10,14 +10,14 @@
 #==============================================================================
 
 OPTION="manual"
-BRANCH="test"
+BRANCH="release-1806"
 
 function changeNameGlobal()
 {
 	NEW_VALUE="\"$1\""
 	NAME_GLOBAL=$2
 	sed_param=s/${NAME_GLOBAL}=\".*/${NAME_GLOBAL}=${NEW_VALUE}/
-	sed -i '' "$sed_param" git-pull.sh
+	sed -i $SCRIPTPATH/git-pull.sh -e "$sed_param"
 }
 
 function getNameOfBranch()
@@ -41,8 +41,12 @@ function getMaxFromBranch()
 	done
 }
 
+SCRIPT="$(readlink --canonicalize-existing "$0")"
+SCRIPTPATH="$(dirname "$SCRIPT")"
+cd $SCRIPTPATH
+
 if [ ! -z "$1" ]; then
-	if [[ $1 = '-help' ]]; then
+	if [[ $1 = '--help' ]]; then
 		if [[ $OPTION = "auto" ]]; then
 			echo -e "You are in automatic mode.\n\nTo switch to manual mode, use the -manual='name of branch' option :\n./git-pull -manual='name of branch'"
 		else
@@ -82,12 +86,10 @@ if [[ $option = "auto" ]]; then
 	do
 		if [[ ${tab[$i]} =~ ^trb-[a-z]{3}-release-[0-9]{4}$ ]]; then
 			trb[$trbInc]=${tab[$i]}
-			#echo ${trb[$trbInc]}
 			trbInc=$((trbInc + 1))
 		fi
 		if [[ ${tab[$i]} =~ ^release-[0-9]{4}$ ]]; then
 			release[$releaseInc]=${tab[$i]}
-			#echo ${release[$releaseInc]}
 			releaseInc=$((releaseInc + 1))
 		fi
 	done
@@ -108,10 +110,6 @@ if [[ $option = "auto" ]]; then
 		echo $BRANCH
 	fi
 fi
-
-SCRIPT="$(readlink --canonicalize-existing "$0")"
-SCRIPTPATH="$(dirname "$SCRIPT")"
-cd $SCRIPTPATH
 
 printf "\n______________ GIT CHECKOUT TRB_BBT ______________\n"
 gr git checkout $BRANCH
