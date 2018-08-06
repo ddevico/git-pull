@@ -9,8 +9,8 @@
 #notes           :Install gr to use this script.
 #==============================================================================
 
-OPTION="manual"
-BRANCH="release-1806"
+OPTION="auto"
+BRANCH=""
 
 function changeNameGlobal()
 {
